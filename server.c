@@ -14,7 +14,10 @@ void report(const char* msg, int terminate) {
 }
 
 int main() {
-int PortNumber=9090,ConversationLen=3,BuffSize=1024,MaxConnects=2;
+int PortNumber=9096,ConversationLen=3,BuffSize=1024,MaxConnects=2;
+
+char data[BuffSize],ch;
+
 int fd = socket(AF_INET,     /* network versus AF_LOCAL */
                   SOCK_STREAM, /* reliable, bidirectional, arbitrary payload size */
                   0);          /* system picks underlying protocol (TCP) */
@@ -47,14 +50,20 @@ while (1) {
     }
 
     /* read from client */
-    int i;
-    for (i = 0; i < ConversationLen; i++) {
+    while(1){
       char buffer[BuffSize + 1];
       memset(buffer, '\0', sizeof(buffer));
       int count = read(client_fd, buffer, sizeof(buffer));
       if (count > 0) {
-        puts(buffer);
-        write(client_fd, buffer, sizeof(buffer)); /* echo as confirmation */
+	printf("client : ");
+	puts(buffer);	
+	printf("press y to send message [y/n] : ");
+         scanf("\n%c",&ch);
+         if(ch=='n')
+	break;
+         printf("server : ");
+         scanf("\n%[^\n]s",data);
+        write(client_fd,data,sizeof(data));
       }
     }
     close(client_fd); /* break connection */
