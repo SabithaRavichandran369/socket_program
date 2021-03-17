@@ -9,9 +9,6 @@
 #include <netinet/tcp.h>
 #include <netdb.h>
 
-const char* books[] = {"learn",
-                       "eat",
-                       "sleep"};
 
 void report(const char* msg, int terminate) {
   perror(msg);
@@ -20,11 +17,15 @@ void report(const char* msg, int terminate) {
 
 int main() {
 
-  int PortNumber=9090,ConversationLen=3,BuffSize=1024;
+  int PortNumber=9096,ConversationLen=3,BuffSize=1024;
+
+  char data[BuffSize],ch;
   /* fd for the socket */
+
   int sockfd = socket(AF_INET,      /* versus AF_LOCAL */
                       SOCK_STREAM,  /* reliable, bidirectional */
                       0);           /* system picks protocol (TCP) */
+
   if (sockfd < 0) report("socket", 1); /* terminate */
 
   /* get the address of the host */
@@ -44,14 +45,19 @@ int main() {
   if (connect(sockfd, (struct sockaddr*) &saddr, sizeof(saddr)) < 0)
     report("connect", 1);
 
-  /* Write some stuff and read the echoes. */
+  /* Write some stuff and read. */
   puts("Connect to server, about to write some stuff...");
-  int i;
-  for (i = 0; i < ConversationLen; i++) {
-    if (write(sockfd, books[i], strlen(books[i])) > 0) {
-      /* get confirmation echoed from server and print */
+   while(1){
+    printf("press y to send message [y/n] : ");
+    scanf("\n%c",&ch);
+    if(ch=='n')
+	break;
+    printf("client : ");
+    scanf("\n%[^\n]s",data);
+    if (write(sockfd,data, sizeof(data)) > 0) {
       char buffer[BuffSize + 1];
       memset(buffer, '\0', sizeof(buffer));
+	printf("server : ");
       if (read(sockfd, buffer, sizeof(buffer)) > 0)
         puts(buffer);
     }
@@ -60,4 +66,3 @@ int main() {
   close(sockfd); /* close the connection */
   return 0;
 }
-
